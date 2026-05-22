@@ -109,10 +109,9 @@
 
       <label>Parte Immaginaria</label>
       <input type="number" id="immaginaria" step="any">
-
-      <button onclick="calcolaDaCartesiana()">
-        Procedi
-      </button>
+<button type="button" onclick="calcolaDaCartesiana()">
+    Procedi
+</button>
     </div>
 
     <!-- Forma polare -->
@@ -124,10 +123,9 @@
 
       <label>Fase (gradi)</label>
       <input type="number" id="fase" step="any">
-
-      <button onclick="calcolaDaPolare()">
-        Procedi
-      </button>
+<button type="button" onclick="calcolaDaPolare()">
+    Procedi
+</button>
     </div>
 
   </div>
@@ -139,128 +137,166 @@
   <canvas id="canvas" width="600" height="600"></canvas>
 
 </div>
-
 <script>
 
-  // ==========================
-  // FUNZIONE 1
-  // Da cartesiana a polare
-  // ==========================
-  function calcolaDaCartesiana() {
+const risultato = document.getElementById("risultato");
+
+
+// =====================================
+// DA CARTESIANA A POLARE
+// =====================================
+function calcolaDaCartesiana() {
 
     const reale = parseFloat(document.getElementById("reale").value);
     const immaginaria = parseFloat(document.getElementById("immaginaria").value);
 
     if (isNaN(reale) || isNaN(immaginaria)) {
-      alert("Inserisci valori validi.");
-      return;
+        alert("Inserisci valori validi");
+        return;
     }
 
-    const modulo = Math.sqrt(reale * reale + immaginaria * immaginaria);
+    const modulo = Math.sqrt(reale**2 + immaginaria**2);
 
-    const faseRad = Math.atan2(immaginaria, reale);
-    const faseDeg = faseRad * 180 / Math.PI;
+    let fase = Math.atan2(immaginaria, reale);
+    fase = fase * 180 / Math.PI;
 
-    mostraRisultati(reale, immaginaria, modulo, faseDeg);
+    mostraRisultati(reale, immaginaria, modulo, fase);
 
     disegnaPunto(reale, immaginaria);
-  }
+}
 
 
-  // ==========================
-  // FUNZIONE 2
-  // Da polare a cartesiana
-  // ==========================
-  function calcolaDaPolare() {
+// =====================================
+// DA POLARE A CARTESIANA
+// =====================================
+function calcolaDaPolare() {
 
     const modulo = parseFloat(document.getElementById("modulo").value);
     const fase = parseFloat(document.getElementById("fase").value);
 
     if (isNaN(modulo) || isNaN(fase)) {
-      alert("Inserisci valori validi.");
-      return;
+        alert("Inserisci valori validi");
+        return;
     }
 
-    const faseRad = fase * Math.PI / 180;
+    const radianti = fase * Math.PI / 180;
 
-    const reale = modulo * Math.cos(faseRad);
-    const immaginaria = modulo * Math.sin(faseRad);
+    const reale = modulo * Math.cos(radianti);
+    const immaginaria = modulo * Math.sin(radianti);
 
     mostraRisultati(reale, immaginaria, modulo, fase);
 
     disegnaPunto(reale, immaginaria);
-  }
+}
 
 
-  // ==========================
-  // Mostra risultati
-  // ==========================
-  function mostraRisultati(reale, immaginaria, modulo, fase) {
+// =====================================
+// MOSTRA RISULTATI
+// =====================================
+function mostraRisultati(reale, immaginaria, modulo, fase) {
 
-    document.getElementById("risultato").innerHTML = `
-      <strong>Parte Reale:</strong> ${reale.toFixed(4)} <br>
-      <strong>Parte Immaginaria:</strong> ${immaginaria.toFixed(4)} <br>
-      <strong>Modulo:</strong> ${modulo.toFixed(4)} <br>
-      <strong>Fase:</strong> ${fase.toFixed(4)}°
+    risultato.innerHTML = `
+        <h3>Risultati</h3>
+
+        <p><strong>Parte reale:</strong> ${reale.toFixed(4)}</p>
+
+        <p><strong>Parte immaginaria:</strong> ${immaginaria.toFixed(4)}</p>
+
+        <p><strong>Modulo:</strong> ${modulo.toFixed(4)}</p>
+
+        <p><strong>Fase:</strong> ${fase.toFixed(4)}°</p>
     `;
-  }
+}
 
 
-  // ==========================
-  // Disegno piano di Gauss
-  // ==========================
-  function disegnaPunto(x, y) {
+// =====================================
+// DISEGNO PIANO DI GAUSS
+// =====================================
+function disegnaPunto(x, y) {
 
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
 
-    const w = canvas.width;
-    const h = canvas.height;
+    const width = canvas.width;
+    const height = canvas.height;
 
-    ctx.clearRect(0, 0, w, h);
+    ctx.clearRect(0, 0, width, height);
 
-    const centroX = w / 2;
-    const centroY = h / 2;
+    const centroX = width / 2;
+    const centroY = height / 2;
 
-    const scala = 30;
+    const scala = 40;
 
-    // Assi
+
+    // ASSI
     ctx.beginPath();
 
     ctx.moveTo(0, centroY);
-    ctx.lineTo(w, centroY);
+    ctx.lineTo(width, centroY);
 
     ctx.moveTo(centroX, 0);
-    ctx.lineTo(centroX, h);
+    ctx.lineTo(centroX, height);
 
     ctx.strokeStyle = "black";
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Punto
+
+    // TACCHETTE
+    for(let i = 0; i < width; i += scala){
+
+        ctx.beginPath();
+
+        ctx.moveTo(i, centroY - 5);
+        ctx.lineTo(i, centroY + 5);
+
+        ctx.stroke();
+    }
+
+    for(let i = 0; i < height; i += scala){
+
+        ctx.beginPath();
+
+        ctx.moveTo(centroX - 5, i);
+        ctx.lineTo(centroX + 5, i);
+
+        ctx.stroke();
+    }
+
+
+    // PUNTO
     const px = centroX + x * scala;
     const py = centroY - y * scala;
 
     ctx.beginPath();
-    ctx.arc(px, py, 6, 0, Math.PI * 2);
+    ctx.arc(px, py, 7, 0, Math.PI * 2);
 
     ctx.fillStyle = "red";
     ctx.fill();
 
-    // Linea dal centro
+
+    // VETTORE
     ctx.beginPath();
+
     ctx.moveTo(centroX, centroY);
     ctx.lineTo(px, py);
 
     ctx.strokeStyle = "blue";
     ctx.lineWidth = 2;
+
     ctx.stroke();
 
-    // Coordinate
+
+    // TESTO
     ctx.fillStyle = "black";
     ctx.font = "16px Arial";
-    ctx.fillText(`(${x.toFixed(2)}, ${y.toFixed(2)})`, px + 10, py - 10);
-  }
+
+    ctx.fillText(
+        `(${x.toFixed(2)}, ${y.toFixed(2)})`,
+        px + 10,
+        py - 10
+    );
+}
 
 </script>
 
