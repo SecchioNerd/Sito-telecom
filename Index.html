@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Calcolatore Numeri Complessi</title>
+
+  <style>
+    body{
+      font-family: Arial, sans-serif;
+      background:#f4f4f4;
+      margin:0;
+      padding:30px;
+      color:#222;
+    }
+
+    .container{
+      max-width:900px;
+      margin:auto;
+      background:white;
+      padding:25px;
+      border-radius:12px;
+      box-shadow:0 0 15px rgba(0,0,0,0.1);
+    }
+
+    h1{
+      text-align:center;
+      margin-bottom:30px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:20px;
+    }
+
+    .card{
+      border:1px solid #ddd;
+      padding:20px;
+      border-radius:10px;
+      background:#fafafa;
+    }
+
+    label{
+      display:block;
+      margin-top:10px;
+      font-weight:bold;
+    }
+
+    input{
+      width:100%;
+      padding:10px;
+      margin-top:5px;
+      border-radius:6px;
+      border:1px solid #ccc;
+      box-sizing:border-box;
+    }
+
+    button{
+      margin-top:20px;
+      width:100%;
+      padding:12px;
+      border:none;
+      border-radius:8px;
+      background:#007bff;
+      color:white;
+      font-size:16px;
+      cursor:pointer;
+    }
+
+    button:hover{
+      background:#0056b3;
+    }
+
+    .result{
+      margin-top:20px;
+      padding:15px;
+      background:#eef6ff;
+      border-radius:8px;
+      line-height:1.8;
+    }
+
+    canvas{
+      margin-top:30px;
+      border:2px solid #333;
+      background:white;
+      width:100%;
+      max-width:600px;
+      display:block;
+      margin-left:auto;
+      margin-right:auto;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <h1>Calcolatore Numeri Complessi</h1>
+
+  <div class="grid">
+
+    <!-- Forma cartesiana -->
+    <div class="card">
+      <h2>Parte Reale e Immaginaria</h2>
+
+      <label>Parte Reale</label>
+      <input type="number" id="reale" step="any">
+
+      <label>Parte Immaginaria</label>
+      <input type="number" id="immaginaria" step="any">
+
+      <button onclick="calcolaDaCartesiana()">
+        Procedi
+      </button>
+    </div>
+
+    <!-- Forma polare -->
+    <div class="card">
+      <h2>Modulo e Fase</h2>
+
+      <label>Modulo</label>
+      <input type="number" id="modulo" step="any">
+
+      <label>Fase (gradi)</label>
+      <input type="number" id="fase" step="any">
+
+      <button onclick="calcolaDaPolare()">
+        Procedi
+      </button>
+    </div>
+
+  </div>
+
+  <div class="result" id="risultato">
+    Inserisci dei valori e premi Procedi.
+  </div>
+
+  <canvas id="canvas" width="600" height="600"></canvas>
+
+</div>
+
+<script>
+
+  // ==========================
+  // FUNZIONE 1
+  // Da cartesiana a polare
+  // ==========================
+  function calcolaDaCartesiana() {
+
+    const reale = parseFloat(document.getElementById("reale").value);
+    const immaginaria = parseFloat(document.getElementById("immaginaria").value);
+
+    if (isNaN(reale) || isNaN(immaginaria)) {
+      alert("Inserisci valori validi.");
+      return;
+    }
+
+    const modulo = Math.sqrt(reale * reale + immaginaria * immaginaria);
+
+    const faseRad = Math.atan2(immaginaria, reale);
+    const faseDeg = faseRad * 180 / Math.PI;
+
+    mostraRisultati(reale, immaginaria, modulo, faseDeg);
+
+    disegnaPunto(reale, immaginaria);
+  }
+
+
+  // ==========================
+  // FUNZIONE 2
+  // Da polare a cartesiana
+  // ==========================
+  function calcolaDaPolare() {
+
+    const modulo = parseFloat(document.getElementById("modulo").value);
+    const fase = parseFloat(document.getElementById("fase").value);
+
+    if (isNaN(modulo) || isNaN(fase)) {
+      alert("Inserisci valori validi.");
+      return;
+    }
+
+    const faseRad = fase * Math.PI / 180;
+
+    const reale = modulo * Math.cos(faseRad);
+    const immaginaria = modulo * Math.sin(faseRad);
+
+    mostraRisultati(reale, immaginaria, modulo, fase);
+
+    disegnaPunto(reale, immaginaria);
+  }
+
+
+  // ==========================
+  // Mostra risultati
+  // ==========================
+  function mostraRisultati(reale, immaginaria, modulo, fase) {
+
+    document.getElementById("risultato").innerHTML = `
+      <strong>Parte Reale:</strong> ${reale.toFixed(4)} <br>
+      <strong>Parte Immaginaria:</strong> ${immaginaria.toFixed(4)} <br>
+      <strong>Modulo:</strong> ${modulo.toFixed(4)} <br>
+      <strong>Fase:</strong> ${fase.toFixed(4)}°
+    `;
+  }
+
+
+  // ==========================
+  // Disegno piano di Gauss
+  // ==========================
+  function disegnaPunto(x, y) {
+
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const w = canvas.width;
+    const h = canvas.height;
+
+    ctx.clearRect(0, 0, w, h);
+
+    const centroX = w / 2;
+    const centroY = h / 2;
+
+    const scala = 30;
+
+    // Assi
+    ctx.beginPath();
+
+    ctx.moveTo(0, centroY);
+    ctx.lineTo(w, centroY);
+
+    ctx.moveTo(centroX, 0);
+    ctx.lineTo(centroX, h);
+
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Punto
+    const px = centroX + x * scala;
+    const py = centroY - y * scala;
+
+    ctx.beginPath();
+    ctx.arc(px, py, 6, 0, Math.PI * 2);
+
+    ctx.fillStyle = "red";
+    ctx.fill();
+
+    // Linea dal centro
+    ctx.beginPath();
+    ctx.moveTo(centroX, centroY);
+    ctx.lineTo(px, py);
+
+    ctx.strokeStyle = "blue";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Coordinate
+    ctx.fillStyle = "black";
+    ctx.font = "16px Arial";
+    ctx.fillText(`(${x.toFixed(2)}, ${y.toFixed(2)})`, px + 10, py - 10);
+  }
+
+</script>
+
+</body>
+</html>
